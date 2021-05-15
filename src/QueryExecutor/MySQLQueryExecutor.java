@@ -1,12 +1,19 @@
 package QueryExecutor;
 
 import Databases.Exceptions.ConnectionIsClosedException;
+import QueryExecutor.Exceptions.IncorrectDBRecordException;
 import Tools.Pair;
+import Tools.TestDBRecord;
 import com.mysql.cj.jdbc.Driver;
 
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 
+
+/**
+ *
+ */
 public class MySQLQueryExecutor {
     private static final String URL = "jdbc:mysql://localhost:3306/";
     private final Connection connection;
@@ -26,31 +33,26 @@ public class MySQLQueryExecutor {
 
     /**
      * This method give an opportunity to execute SQL function: INSERT
-     *
      * @param tableName string representation of the table name;
-     * @param data a list of field names and their corresponding inserted values ({@code List<Pair<String, ?>>});
+     * @param record
      * @throws SQLException
-     * @throws ConnectionIsClosedException if connection with database is closed method
-     * throws this Exception
+     * @throws ConnectionIsClosedException
+     * @throws IncorrectDBRecordException
      */
-    public void insert(String tableName, List<Pair<String, ?>> data) throws SQLException, ConnectionIsClosedException {
+    public void insert(String tableName, Object record) throws SQLException {
         if (connection.isClosed()) {
             throw new ConnectionIsClosedException("Connection with database is closed");
         }
-        Statement statement = connection.createStatement();
-        StringJoiner fieldNames = new StringJoiner(", ", "(", ")");
-        StringJoiner values = new StringJoiner(", ", "(", ")");
-        for (Pair<String, ?> pair : data) {
-            fieldNames.add(pair.getKey());
-            if (pair.getValue() instanceof Number) {
-                values.add((pair.getValue()).toString());
-            } else {
-                values.add("'" + pair.getValue() + "'");
-            }
+        if (record == null) {
+            throw new IncorrectDBRecordException("Object of DB record is null");
         }
-        statement.execute("INSERT INTO " + tableName + " " + fieldNames + " VALUES " + values);
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery("SELECT * FROM " + tableName);
+        Pair<String, String> matches = getMatches(rs.getMetaData(), record);
+        statement.execute("INSERT INTO " + tableName + " " + matches.getKey() + " VALUES " + matches.getValue());
         statement.close();
     }
+
 
     /**
      * This method give an opportunity to execute SQL function: SELECT *
@@ -65,26 +67,12 @@ public class MySQLQueryExecutor {
         }
         Statement statement = connection.createStatement();
         ResultSet returnedSet = statement.executeQuery("SELECT * FROM " + tableName);
+        ResultSetMetaData resultSetMetaData = returnedSet.getMetaData();
+        System.out.println(resultSetMetaData.getColumnTypeName(1));
         statement.close();
         return returnedSet;
     }
 
-
-    public ResultSet select(String tableName, List<Pair<String, ?>> whereList) throws SQLException, ConnectionIsClosedException{
-        if (connection.isClosed()) {
-            throw new ConnectionIsClosedException("Connection with database is closed");
-        }
-        Statement statement = connection.createStatement();
-        StringJoiner sj = new StringJoiner("," , "(" , ")");
-        String el;
-        for (Pair<String, ?> pair: whereList) {
-            el = pair.getValue() instanceof Number ? pair.getValue().toString() : "'" + pair.getValue() +"'";
-            sj.add(pair.getKey() + "=" + el);
-        }
-       // System.out.println("SELECT * FROM " + tableName + );
-        ResultSet returnedSet = statement.executeQuery("SELECT * FROM " + tableName);
-        return returnedSet;
-    }
 
     /**
      * This method give an opportunity to execute SQL function: TRUNCATE (TABLE)
@@ -116,5 +104,40 @@ public class MySQLQueryExecutor {
      */
     public boolean isClosed() throws SQLException {
         return connection.isClosed();
+    }
+
+    private Pair<String, String> getMatches(ResultSetMetaData rsmd, Object record) throws SQLException {
+        int colCount = rsmd.getColumnCount();
+        List<Pair<String, String>> pairList = new ArrayList<>();
+        Class<?> recClass = record.getClass();
+        StringJoiner fieldNames = new StringJoiner(", ", "(", ")");
+        StringJoiner values = new StringJoiner(", ", "(", ")");
+        try {
+            for (int i = 1; i <= colCount; i++) {
+                String columnName = rsmd.getColumnName(i);
+                Object value = recClass.getDeclaredField(columnName).get(record);
+                fieldNames.add(columnName);
+                if (value instanceof Number) {
+                    values.add(value.toString());
+                    // pairList.add(new Pair<>(columnName, value.toString()));
+                } else {
+                    values.add("'" + value + "'");
+                    // pairList.add(new Pair<>(columnName, "'" + value + "'"));
+                }
+            }
+        } catch (NoSuchFieldException e) {
+            throw new IncorrectDBRecordException("Record fields do not match column names of DB", e.getCause());
+        } catch (IllegalAccessException e) {
+            throw new IncorrectDBRecordException("Not all fields are specified with an access modifier 'public'", e.getCause());
+        }
+        return new Pair<>(fieldNames.toString(), values.toString());
+    }
+
+    public static void main(String[] args) throws SQLException, NoSuchFieldException, IllegalAccessException {
+        MySQLQueryExecutor executor = new MySQLQueryExecutor("test_database", "admin", "admin");
+        TestDBRecord record = new TestDBRecord(4, "Vasya", 34.3, "2001.11.08");
+        executor.insert("test_table", record);
+
+
     }
 }
