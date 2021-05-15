@@ -5,13 +5,21 @@ import QueryExecutor.Exceptions.IncorrectDBRecordException;
 import Tools.Pair;
 import Tools.TestDBRecord;
 import com.mysql.cj.jdbc.Driver;
-
-import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 
-
-/**
+/**<h1>MySQLQueryExecutor class</h1>
+ * <h2>
+ * The class simplifies making queries to databases MySQL.
+ * For the convenience of using the class, special parameters are introduced (records).
+ * </h2>
+ * <h3>
+ * Record - Any class whose field names must exactly match the names of the columns in the database table.
+ * All fields of this class must be public.
+ * The class should not have getters and setters.
+ * The class must have a public full (sets values for all fields) constructor.
+ * The class must implement interface {@link Recordable}
+ * </h3>
  *
  */
 public class MySQLQueryExecutor {
@@ -32,14 +40,16 @@ public class MySQLQueryExecutor {
     }
 
     /**
-     * This method give an opportunity to execute SQL function: INSERT
+     * This method give an opportunity to execute SQL function: <h2>INSERT</h2>
      * @param tableName string representation of the table name;
-     * @param record
+     * @param record a special class corresponding to a specific table.
+     *               The record description rules for the table are specified in the class description.
      * @throws SQLException
-     * @throws ConnectionIsClosedException
-     * @throws IncorrectDBRecordException
+     * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
+     * @throws IncorrectDBRecordException if object of record does not match the corresponding table.
+     * The record description rules for the table are specified in the class description.
      */
-    public void insert(String tableName, Object record) throws SQLException {
+    public void insert(String tableName, Recordable record) throws SQLException {
         if (connection.isClosed()) {
             throw new ConnectionIsClosedException("Connection with database is closed");
         }
@@ -55,7 +65,7 @@ public class MySQLQueryExecutor {
 
 
     /**
-     * This method give an opportunity to execute SQL function: SELECT *
+     * This method give an opportunity to execute SQL function: <h2>SELECT *</h2>
      * @param tableName string representation of the table name;
      * @return {@code ResultSet}
      * @throws SQLException
@@ -75,7 +85,7 @@ public class MySQLQueryExecutor {
 
 
     /**
-     * This method give an opportunity to execute SQL function: TRUNCATE (TABLE)
+     * This method give an opportunity to execute SQL function: <h2>TRUNCATE (TABLE)</h2>
      * @param tableName string representation of the table name;
      * @throws SQLException
      * @throws ConnectionIsClosedException if connection with database is closed method
@@ -119,10 +129,8 @@ public class MySQLQueryExecutor {
                 fieldNames.add(columnName);
                 if (value instanceof Number) {
                     values.add(value.toString());
-                    // pairList.add(new Pair<>(columnName, value.toString()));
                 } else {
                     values.add("'" + value + "'");
-                    // pairList.add(new Pair<>(columnName, "'" + value + "'"));
                 }
             }
         } catch (NoSuchFieldException e) {
@@ -135,7 +143,7 @@ public class MySQLQueryExecutor {
 
     public static void main(String[] args) throws SQLException, NoSuchFieldException, IllegalAccessException {
         MySQLQueryExecutor executor = new MySQLQueryExecutor("test_database", "admin", "admin");
-        TestDBRecord record = new TestDBRecord(4, "Vasya", 34.3, "2001.11.08");
+        TestDBRecord record = new TestDBRecord(5, "Vasya", 34.3, "2001.11.08");
         executor.insert("test_table", record);
 
 

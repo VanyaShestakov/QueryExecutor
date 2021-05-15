@@ -1,6 +1,8 @@
 package QueryExecutor.Exceptions;
 
-public class IncorrectDBRecordException extends RuntimeException{
+import java.io.Serializable;
+
+public class IncorrectDBRecordException extends RuntimeException {
     public IncorrectDBRecordException() {
         super();
     }
