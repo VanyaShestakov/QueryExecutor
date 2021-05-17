@@ -1,8 +1,6 @@
 package Tools;
 
-import QueryExecutor.Recordable;
-
-public class TestDBRecord implements Recordable {
+public class TestDBRecord {
     public int id;
     public String name;
     public double temperature;
