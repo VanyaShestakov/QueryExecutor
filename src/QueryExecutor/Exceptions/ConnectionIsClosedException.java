@@ -1,4 +1,4 @@
-package Databases.Exceptions;
+package QueryExecutor.Exceptions;
 
 public class ConnectionIsClosedException extends RuntimeException {
     public ConnectionIsClosedException() {

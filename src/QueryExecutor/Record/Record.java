@@ -34,6 +34,10 @@ public class Record {
         }
     }
 
+    public String toString () {
+        return data.toString();
+    }
+
 
 
 }

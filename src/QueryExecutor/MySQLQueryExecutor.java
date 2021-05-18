@@ -1,10 +1,9 @@
 package QueryExecutor;
 
-import Databases.Exceptions.ConnectionIsClosedException;
+import QueryExecutor.Exceptions.ConnectionIsClosedException;
 import QueryExecutor.Exceptions.IncorrectRecordException;
 import QueryExecutor.Record.Record;
 import Tools.Pair;
-import QueryExecutor.Record.*;
 import com.mysql.cj.jdbc.Driver;
 import java.sql.*;
 import java.util.*;
@@ -15,14 +14,9 @@ import java.util.*;
  * For the convenience of using the class, special parameters are introduced (records).
  * </h2>
  * <h3>
- * {@code record param} ({@link })- Any class whose field names must exactly match the names of the columns in the database table.
- * All fields of this class must be public.
- * The class should not have getters and setters.
- * The class must have a public full (sets values for all fields) constructor.
- * The class must implement interface {@link }
- * </h3>
- * <h3>
- * {@code record param} ({@link Map}) - Any Map whose keys values must exactly match the names of the columns in the database table.
+ * {@code record param} ({@link Record})- a special class that contains fields and their values.
+ * For successful operations when working with tables, the record fields must completely match the names of the columns
+ * in the database table, otherwise will be thrown {@link IncorrectRecordException}. The Record class is based on the {@link Map}
  * </h3>
  *
  */
@@ -45,11 +39,11 @@ public class MySQLQueryExecutor {
 
     /**This method give an opportunity to execute SQL function: <h2>INSERT</h2>
      * @param tableName string representation of the table name;
-     * @param record a {@link Map} corresponding to a specific table.
+     * @param record a {@link Record} corresponding to a specific table.
      *               The record description rules for the table are specified in the class description.
      * @throws SQLException
      * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
-     * @throws IncorrectRecordException if object of record does not match the corresponding table.
+     * @throws IncorrectRecordException if record fields does not match the corresponding table.
      * The record description rules for the table are specified in the class description.
      */
     public void insert(String tableName, Record record) throws SQLException {
@@ -59,7 +53,6 @@ public class MySQLQueryExecutor {
         ResultSet rs = statement.executeQuery("SELECT * FROM " + tableName);
         Pair<String, String> matches = getMatches(rs.getMetaData(), record);
         System.out.println("INSERT INTO " + tableName + " " + matches.getKey() + " VALUES " + matches.getValue());
-        //statement.execute("INSERT INTO " + tableName + " " + matches.getKey() + " VALUES " + matches.getValue());
         statement.close();
     }
 
@@ -67,18 +60,17 @@ public class MySQLQueryExecutor {
     /**
      * This method give an opportunity to execute SQL function: <h2>SELECT *</h2>
      * @param tableName string representation of the table name;
-     * @return {@code ResultSet}
+     * @return {@link List} of {@link Record}
      * @throws SQLException
-     * @throws ConnectionIsClosedException
+     * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
      */
-    public ResultSet select(String tableName) throws SQLException, ConnectionIsClosedException {
+    public List<Record> select(String tableName) throws SQLException, ConnectionIsClosedException {
         checkConnection();
         Statement statement = connection.createStatement();
-        ResultSet returnedSet = statement.executeQuery("SELECT * FROM " + tableName);
-        ResultSetMetaData resultSetMetaData = returnedSet.getMetaData();
-        System.out.println(resultSetMetaData.getColumnTypeName(1));
+        ResultSet rs = statement.executeQuery("SELECT * FROM " + tableName);
+        List<Record> records = getRecordsFromResSet(rs, rs.getMetaData());
         statement.close();
-        return returnedSet;
+        return records;
     }
 
     /**
@@ -137,6 +129,19 @@ public class MySQLQueryExecutor {
         return new Pair<>(colNames.toString(), values.toString());
     }
 
+    private List<Record> getRecordsFromResSet(ResultSet rs, ResultSetMetaData rsmd) throws SQLException {
+        int colCount = rsmd.getColumnCount();
+        List<Record> returnedList = new ArrayList<>();
+        while (rs.next()) {
+            Record temp = new Record();
+            for (int i = 1; i <= colCount; i++) {
+                temp.addField(rsmd.getColumnName(i), rs.getObject(rsmd.getColumnName(i)));
+            }
+            returnedList.add(temp);
+        }
+        return returnedList;
+    }
+
     private void checkConnection() throws SQLException {
         if (connection.isClosed()) {
             throw new ConnectionIsClosedException("Connection with database is closed");
@@ -151,8 +156,10 @@ public class MySQLQueryExecutor {
 
     public static void main(String[] args) throws SQLException {
         MySQLQueryExecutor executor = new MySQLQueryExecutor("test_database", "admin", "admin");
-        Record record = new Record();
-        executor.insert("test_table", record);
+        List<Record> list = executor.select("test_table");
+        for (Record rec : list) {
+            System.out.println(rec);
+        }
     }
 
 }
