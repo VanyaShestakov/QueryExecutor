@@ -4,6 +4,7 @@ import QueryExecutor.Record.Exceptions.FieldNameDoesNotExistsException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Record {
     private Map<String, Object> data;
@@ -38,6 +39,18 @@ public class Record {
         return data.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Record record = (Record) o;
+        return data.equals(record.data);
+    }
 
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(data);
+    }
 }
