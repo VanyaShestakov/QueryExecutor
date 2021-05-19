@@ -74,6 +74,28 @@ public class MySQLQueryExecutor {
     }
 
     /**
+     * This method give an opportunity to execute SQL function: <h2>SELECT &lt col_name1 &gt, &lt col_name2 &gt, …</h2>
+     * @param tableName string representation of the table name;
+     * @param fields list of selected fields names from database table
+     * @return {@link List} of {@link Record}
+     * @throws SQLException
+     * @throws ConnectionIsClosedException
+     */
+    public List<Record> select(String tableName, List<String> fields) throws SQLException, ConnectionIsClosedException {
+        checkConnection();
+        Statement statement = connection.createStatement();
+        StringJoiner sj = new StringJoiner(",");
+        for (String fieldName: fields){
+            sj.add(fieldName);
+        }
+        ResultSet rs = statement.executeQuery("SELECT " + sj + " FROM " + tableName);
+        List<Record> records = getRecordsFromResSet(rs, rs.getMetaData());
+        statement.close();
+        return records;
+    }
+
+
+    /**
      * This method give an opportunity to execute SQL function: <h2>TRUNCATE (TABLE)</h2>
      * @param tableName string representation of the table name;
      * @throws SQLException
@@ -155,11 +177,22 @@ public class MySQLQueryExecutor {
     }
 
     public static void main(String[] args) throws SQLException {
-        MySQLQueryExecutor executor = new MySQLQueryExecutor("test_database", "admin", "admin");
+       /* MySQLQueryExecutor executor = new MySQLQueryExecutor("test_database", "admin", "admin");
         List<Record> list = executor.select("test_table");
         for (Record rec : list) {
             System.out.println(rec);
         }
+        List<String> listNames = new ArrayList<>(Arrays.asList("id", "name"));
+        List<Record> list1 = executor.select("test_table", listNames);
+        System.out.println(list1);*/
+        Record rec = new Record();
+        rec.addField("id", 43);
+        rec.addField("name", "Ivan");
+        Set<String> set = rec.getFieldNames();
+        for (String fieldName: set) {
+            System.out.println(rec.getValue(fieldName));
+        }
+        System.out.println(rec.getFieldNames());
     }
 
 }

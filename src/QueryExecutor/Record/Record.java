@@ -5,12 +5,14 @@ import QueryExecutor.Record.Exceptions.FieldNameDoesNotExistsException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public class Record {
-    private Map<String, Object> data;
+    private final Map<String, Object> data;
     public Record () {
         data = new HashMap<>();
     }
+
     public Record (Map<String, Object> data) {
         this.data = data;
     }
@@ -33,6 +35,10 @@ public class Record {
         } else {
             throw new FieldNameDoesNotExistsException("Record does not contain the field with name: " + fieldName);
         }
+    }
+
+    public Set<String> getFieldNames() {
+        return data.keySet();
     }
 
     public String toString () {
