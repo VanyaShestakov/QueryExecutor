@@ -52,7 +52,7 @@ public class MySQLQueryExecutor {
         Statement statement = connection.createStatement();
         ResultSet rs = statement.executeQuery("SELECT * FROM " + tableName);
         Pair<String, String> matches = getMatches(rs.getMetaData(), record);
-        System.out.println("INSERT INTO " + tableName + " " + matches.getKey() + " VALUES " + matches.getValue());
+        statement.execute("INSERT INTO " + tableName + " " + matches.getKey() + " VALUES " + matches.getValue());
         statement.close();
     }
 
@@ -125,7 +125,6 @@ public class MySQLQueryExecutor {
         return connection.isClosed();
     }
 
-
     private Pair<String, String> getMatches(ResultSetMetaData rsmd, Record data) throws SQLException {
         int colCount = rsmd.getColumnCount();
         List<Pair<String, String>> pairList = new ArrayList<>();
@@ -177,22 +176,14 @@ public class MySQLQueryExecutor {
     }
 
     public static void main(String[] args) throws SQLException {
-       /* MySQLQueryExecutor executor = new MySQLQueryExecutor("test_database", "admin", "admin");
-        List<Record> list = executor.select("test_table");
-        for (Record rec : list) {
-            System.out.println(rec);
-        }
-        List<String> listNames = new ArrayList<>(Arrays.asList("id", "name"));
-        List<Record> list1 = executor.select("test_table", listNames);
-        System.out.println(list1);*/
-        Record rec = new Record();
-        rec.addField("id", 43);
-        rec.addField("name", "Ivan");
-        Set<String> set = rec.getFieldNames();
-        for (String fieldName: set) {
-            System.out.println(rec.getValue(fieldName));
-        }
-        System.out.println(rec.getFieldNames());
+       MySQLQueryExecutor executor = new MySQLQueryExecutor("test_database", "admin", "admin");
+       Record record = new Record();
+       record.addField("id", 54);
+        record.addField("name", "ff");
+        record.addField("date", "2003.01.02");
+        record.addField("temperature", 3.5);
+        executor.insert("test_table", record);
+
     }
 
 }
