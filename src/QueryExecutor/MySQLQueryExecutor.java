@@ -75,7 +75,15 @@ public class MySQLQueryExecutor {
         return records;
     }
 
-
+    /**
+     * This method give an opportunity to execute SQL function: <h2>SELECT * WHERE &lt condition &gt</h2>
+     * @param tableName string representation of the table name
+     * @param expression condition of WHERE SQL keyword ({@link WhereExpression})
+     * @return
+     * @throws SQLSyntaxErrorException if param {@code tableName} or {@code expression} does not match data from database
+     * @throws SQLException
+     * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
+     */
     public List<Record> select(String tableName, WhereExpression expression) throws SQLException, ConnectionIsClosedException {
         checkConnection();
         Statement statement = connection.createStatement();
@@ -91,7 +99,7 @@ public class MySQLQueryExecutor {
      * @param fields list of selected fields names from database table
      * @return {@link List} of {@link Record}
      * @throws SQLException
-     * @throws ConnectionIsClosedException
+     * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
      */
     public List<Record> select(String tableName, List<String> fields) throws SQLException, ConnectionIsClosedException {
         checkConnection();
@@ -106,6 +114,16 @@ public class MySQLQueryExecutor {
         return records;
     }
 
+    /**
+     * This method give an opportunity to execute SQL function: <h2>SELECT &lt col_name1 &gt, &lt col_name2 &gt, … WHERE &lt condition &gt</h2>
+     * @param tableName string representation of the table name
+     * @param fields list of selected fields names from database table
+     * @param expression condition of WHERE SQL keyword ({@link WhereExpression})
+     * @return
+     * @throws SQLSyntaxErrorException if param {@code tableName} or {@code expression} does not match data from database
+     * @throws SQLException
+     * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
+     */
     public List<Record> select(String tableName, List<String> fields, WhereExpression expression) throws SQLException, ConnectionIsClosedException {
         checkConnection();
         Statement statement = connection.createStatement();
@@ -118,7 +136,6 @@ public class MySQLQueryExecutor {
         statement.close();
         return records;
     }
-
 
     /**
      * This method give an opportunity to execute SQL function: <h2>TRUNCATE (TABLE)</h2>
