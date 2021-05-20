@@ -7,10 +7,10 @@ public class WhereExpression {
         expression = new StringBuilder();
     }
 
-    private static class Condition {
+    public class Condition {
         private final StringBuilder expression;
 
-        protected Condition(StringBuilder expression) {
+        private Condition(StringBuilder expression) {
             this.expression = expression;
         }
 
@@ -41,10 +41,4 @@ public class WhereExpression {
         return expression.toString();
     }
 
-    public static void main(String[] args) {
-        WhereExpression expression = new WhereExpression();
-        expression.addCondition("a > b").and("c > a").or("c < b");
-        System.out.println(expression);
-
-    }
 }

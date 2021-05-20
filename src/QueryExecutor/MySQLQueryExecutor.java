@@ -3,10 +3,12 @@ package QueryExecutor;
 import QueryExecutor.Exceptions.ConnectionIsClosedException;
 import QueryExecutor.Exceptions.IncorrectRecordException;
 import QueryExecutor.Record.Record;
+import QueryExecutor.WhereExpression.WhereExpression;
 import Tools.Pair;
 import com.mysql.cj.jdbc.Driver;
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**<h1>MySQLQueryExecutor class</h1>
  * <h2>
@@ -73,6 +75,16 @@ public class MySQLQueryExecutor {
         return records;
     }
 
+
+    public List<Record> select(String tableName, WhereExpression expression) throws SQLException, ConnectionIsClosedException {
+        checkConnection();
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery("SELECT * FROM " + tableName + " WHERE " + expression);
+        List<Record> records = getRecordsFromResSet(rs, rs.getMetaData());
+        statement.close();
+        return records;
+    }
+
     /**
      * This method give an opportunity to execute SQL function: <h2>SELECT &lt col_name1 &gt, &lt col_name2 &gt, …</h2>
      * @param tableName string representation of the table name;
@@ -89,6 +101,19 @@ public class MySQLQueryExecutor {
             sj.add(fieldName);
         }
         ResultSet rs = statement.executeQuery("SELECT " + sj + " FROM " + tableName);
+        List<Record> records = getRecordsFromResSet(rs, rs.getMetaData());
+        statement.close();
+        return records;
+    }
+
+    public List<Record> select(String tableName, List<String> fields, WhereExpression expression) throws SQLException, ConnectionIsClosedException {
+        checkConnection();
+        Statement statement = connection.createStatement();
+        StringJoiner sj = new StringJoiner(",");
+        for (String fieldName: fields){
+            sj.add(fieldName);
+        }
+        ResultSet rs = statement.executeQuery("SELECT " + sj + " FROM " + tableName + " WHERE " + expression);
         List<Record> records = getRecordsFromResSet(rs, rs.getMetaData());
         statement.close();
         return records;
@@ -177,13 +202,15 @@ public class MySQLQueryExecutor {
 
     public static void main(String[] args) throws SQLException {
        MySQLQueryExecutor executor = new MySQLQueryExecutor("test_database", "admin", "admin");
-       Record record = new Record();
-       record.addField("id", 54);
-        record.addField("name", "ff");
-        record.addField("date", "2003.01.02");
-        record.addField("temperature", 3.5);
-        executor.insert("test_table", record);
 
+       // executor.insert("test_table", record);
+        WhereExpression expression = new WhereExpression();
+        expression.addCondition("id > 1").and("temperature < 35");
+        List<String> l = new ArrayList<>();
+        l.add("id");
+        l.add("d");
+        List<Record> records = executor.select("test_tabl", l , expression);
+        System.out.println(records);
     }
 
 }
