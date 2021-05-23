@@ -119,7 +119,7 @@ public class MySQLQueryExecutor {
      * @param tableName string representation of the table name
      * @param fields list of selected fields names from database table
      * @param expression condition of WHERE SQL keyword ({@link WhereExpression})
-     * @return
+     * @return {@link List} of {@link Record}
      * @throws SQLSyntaxErrorException if param {@code tableName} or {@code expression} does not match data from database
      * @throws SQLException
      * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
@@ -135,6 +135,33 @@ public class MySQLQueryExecutor {
         List<Record> records = getRecordsFromResSet(rs, rs.getMetaData());
         statement.close();
         return records;
+    }
+
+    /**
+     * This method give an opportunity to execute SQL function: <h2>DELETE FROM &lt table name &gt </h2>
+     * @param tableName string representation of the table name
+     * @throws SQLException
+     * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
+     */
+    public void delete(String tableName) throws SQLException, ConnectionIsClosedException {
+        checkConnection();
+        Statement statement = connection.createStatement();
+        statement.execute("DELETE FROM " + tableName);
+        statement.close();
+    }
+
+    /**
+     * This method give an opportunity to execute SQL function: <h2>DELETE FROM &lt table name &gt WHERE &lt condition &gt </h2>
+     * @param tableName string representation of the table name
+     * @param expression condition of WHERE SQL keyword ({@link WhereExpression})
+     * @throws SQLException
+     * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
+     */
+    public void delete(String tableName, WhereExpression expression) throws SQLException, ConnectionIsClosedException {
+        checkConnection();
+        Statement statement = connection.createStatement();
+        statement.execute("DELETE FROM " + tableName + " WHERE " + expression);
+        statement.close();
     }
 
     /**
@@ -219,15 +246,16 @@ public class MySQLQueryExecutor {
 
     public static void main(String[] args) throws SQLException {
        MySQLQueryExecutor executor = new MySQLQueryExecutor("test_database", "admin", "admin");
-
+       WhereExpression expression = new WhereExpression();
+       expression.addCondition("name = 'Ivan'");
+       executor.delete("test_table", expression);
        // executor.insert("test_table", record);
-        WhereExpression expression = new WhereExpression();
-        expression.addCondition("id > 1").and("temperature < 35");
+       /* WhereExpression expression = new WhereExpression();
         List<String> l = new ArrayList<>();
         l.add("id");
         l.add("d");
-        List<Record> records = executor.select("test_tabl", l , expression);
-        System.out.println(records);
+        List<Record> records = executor.select("test_table", l , expression);
+        System.out.println(records);*/
     }
 
 }
