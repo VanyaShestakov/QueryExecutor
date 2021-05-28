@@ -58,6 +58,19 @@ public class MySQLQueryExecutor {
         statement.close();
     }
 
+    public void update(String tableName, Record record, WhereExpression expression) throws SQLException {
+        System.out.println(buildSetExpression(record));
+       /* checkConnection();
+        checkRecord(record);
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery("UPDATE * FROM " + tableName);
+        Pair<String, String> matches = getMatches(rs.getMetaData(), record);
+        statement.execute("INSERT INTO " + tableName + " " + matches.getKey() + " VALUES " + matches.getValue());
+        statement.close();*/
+    }
+
+
+
 
     /**
      * This method give an opportunity to execute SQL function: <h2>SELECT *</h2>
@@ -194,6 +207,18 @@ public class MySQLQueryExecutor {
         return connection.isClosed();
     }
 
+    private String buildSetExpression(Record record) {
+        Set<String> keys = record.getKeySet();
+        StringBuilder sb = new StringBuilder();
+        StringJoiner sj = new StringJoiner(", ");
+        for (String key: keys) {
+            Object value = record.getValue(key);
+            String strValue = value instanceof Number ? value.toString() : (value == null ? "null" : "'" + value + "'");
+            sj.add(key + "=" + strValue);
+        }
+        return sj.toString();
+    }
+
     private Pair<String, String> getMatches(ResultSetMetaData rsmd, Record data) throws SQLException {
         int colCount = rsmd.getColumnCount();
         List<Pair<String, String>> pairList = new ArrayList<>();
@@ -247,8 +272,15 @@ public class MySQLQueryExecutor {
     public static void main(String[] args) throws SQLException {
        MySQLQueryExecutor executor = new MySQLQueryExecutor("test_database", "admin", "admin");
        WhereExpression expression = new WhereExpression();
-       expression.addCondition("name = 'Ivan'");
-       executor.delete("test_table", expression);
+       Record rec = new Record();
+       rec.addField("id", 3);
+       rec.addField("name", "Ivan");
+       rec.addField("sex", null);
+
+       executor.update("ddd", rec, expression);
+
+      // expression.addCondition("name = 'Ivan'");
+       //executor.delete("test_table", expression);
        // executor.insert("test_table", record);
        /* WhereExpression expression = new WhereExpression();
         List<String> l = new ArrayList<>();
