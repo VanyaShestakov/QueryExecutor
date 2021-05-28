@@ -58,19 +58,13 @@ public class MySQLQueryExecutor {
         statement.close();
     }
 
-    public void update(String tableName, Record record, WhereExpression expression) throws SQLException {
-        System.out.println(buildSetExpression(record));
-       /* checkConnection();
+    public void update(String tableName, Record record, WhereExpression whereExpression) throws SQLException {
+        checkConnection();
         checkRecord(record);
         Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery("UPDATE * FROM " + tableName);
-        Pair<String, String> matches = getMatches(rs.getMetaData(), record);
-        statement.execute("INSERT INTO " + tableName + " " + matches.getKey() + " VALUES " + matches.getValue());
-        statement.close();*/
+        statement.executeUpdate("UPDATE " + tableName + " SET " + buildSetExpression(record) + " WHERE " + whereExpression);
+        statement.close();
     }
-
-
-
 
     /**
      * This method give an opportunity to execute SQL function: <h2>SELECT *</h2>
@@ -273,11 +267,11 @@ public class MySQLQueryExecutor {
        MySQLQueryExecutor executor = new MySQLQueryExecutor("test_database", "admin", "admin");
        WhereExpression expression = new WhereExpression();
        Record rec = new Record();
-       rec.addField("id", 3);
-       rec.addField("name", "Ivan");
-       rec.addField("sex", null);
 
-       executor.update("ddd", rec, expression);
+       rec.addField("name", "Ivan");
+       expression.addCondition("name='Vasya'");
+
+       executor.update("test_table", rec, expression);
 
       // expression.addCondition("name = 'Ivan'");
        //executor.delete("test_table", expression);
