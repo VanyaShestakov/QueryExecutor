@@ -1,5 +1,7 @@
 package QueryExecutor.Record;
 
+import QueryExecutor.Record.Exceptions.FieldNameDoesNotExistsException;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -31,9 +33,8 @@ public class Record {
         if (data.containsKey(fieldName)) {
             return data.get(fieldName);
         } else {
-            //throw new FieldNameDoesNotExistsException("Record does not contain the field with name: " + fieldName);
+            throw new FieldNameDoesNotExistsException("Record does not contain the field with name: " + fieldName);
         }
-        return new Object();
     }
 
     public Set<String> getKeySet() {

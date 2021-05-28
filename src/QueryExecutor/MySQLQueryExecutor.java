@@ -29,8 +29,8 @@ public class MySQLQueryExecutor {
     /**
      * Constructor registers driver and get connection from {@code DriverManager}
      * @param dbName name of database without full URL to local server
-     * @param user
-     * @param password
+     * @param user username of db user
+     * @param password password of db user
      * @throws SQLException
      */
     public MySQLQueryExecutor(String dbName, String user, String password) throws SQLException {
@@ -42,7 +42,7 @@ public class MySQLQueryExecutor {
     /**This method give an opportunity to execute SQL function: <h2>INSERT</h2>
      * @param tableName string representation of the table name;
      * @param record a {@link Record} corresponding to a specific table.
-     *               The record description rules for the table are specified in the class description.
+     * The record description rules for the table are specified in the class description.
      * @throws SQLException
      * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
      * @throws IncorrectRecordException if record fields does not match the corresponding table.
@@ -58,6 +58,18 @@ public class MySQLQueryExecutor {
         statement.close();
     }
 
+    /**
+     * This method give an opportunity to execute SQL function: <h2>UPDATE &lt table name &gt SET &lt  col_name &gt = &lt  value &gt ... WHERE &lt condition &gt</h2>
+     * @param tableName string representation of the table name;
+     * @param record a {@link Record} corresponding to a specific table.
+     * The record description rules for the table are specified in the class description.
+     * @param whereExpression condition of WHERE SQL keyword ({@link WhereExpression})
+     * @throws SQLSyntaxErrorException if param {@code tableName} or {@code expression} does not match data from database
+     * @throws SQLException
+     * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
+     * @throws IncorrectRecordException if record fields does not match the corresponding table.
+     * The record description rules for the table are specified in the class description.
+     */
     public void update(String tableName, Record record, WhereExpression whereExpression) throws SQLException {
         checkConnection();
         checkRecord(record);
@@ -72,6 +84,7 @@ public class MySQLQueryExecutor {
      * @return {@link List} of {@link Record}
      * @throws SQLException
      * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
+     * @throws SQLSyntaxErrorException if param {@code tableName} does not match table name from database
      */
     public List<Record> select(String tableName) throws SQLException, ConnectionIsClosedException {
         checkConnection();
@@ -149,6 +162,7 @@ public class MySQLQueryExecutor {
      * @param tableName string representation of the table name
      * @throws SQLException
      * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
+     * @throws SQLSyntaxErrorException if param {@code tableName} does not match table name from database
      */
     public void delete(String tableName) throws SQLException, ConnectionIsClosedException {
         checkConnection();
@@ -163,6 +177,7 @@ public class MySQLQueryExecutor {
      * @param expression condition of WHERE SQL keyword ({@link WhereExpression})
      * @throws SQLException
      * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
+     * @throws SQLSyntaxErrorException if param {@code tableName} or {@code expression} does not match data from database
      */
     public void delete(String tableName, WhereExpression expression) throws SQLException, ConnectionIsClosedException {
         checkConnection();
@@ -176,7 +191,8 @@ public class MySQLQueryExecutor {
      * @param tableName string representation of the table name;
      * @throws SQLException
      * @throws ConnectionIsClosedException if connection with database is closed method
-     *      * throws this Exception
+     * throws this Exception
+     * @throws SQLSyntaxErrorException if param {@code tableName} does not match table name from database
      */
     public void truncate(String tableName) throws SQLException, ConnectionIsClosedException {
         checkConnection();
@@ -272,16 +288,6 @@ public class MySQLQueryExecutor {
        expression.addCondition("name='Vasya'");
 
        executor.update("test_table", rec, expression);
-
-      // expression.addCondition("name = 'Ivan'");
-       //executor.delete("test_table", expression);
-       // executor.insert("test_table", record);
-       /* WhereExpression expression = new WhereExpression();
-        List<String> l = new ArrayList<>();
-        l.add("id");
-        l.add("d");
-        List<Record> records = executor.select("test_table", l , expression);
-        System.out.println(records);*/
     }
 
 }
