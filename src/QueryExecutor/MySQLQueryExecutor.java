@@ -24,7 +24,11 @@ import java.util.stream.Stream;
  */
 public class MySQLQueryExecutor {
     private static final String URL = "jdbc:mysql://localhost:3306/";
-    private final Connection connection;
+    private Connection connection;
+    private final String dbName;
+    private final String user;
+    private final String password;
+
 
     /**
      * Constructor registers driver and get connection from {@code DriverManager}
@@ -36,7 +40,9 @@ public class MySQLQueryExecutor {
     public MySQLQueryExecutor(String dbName, String user, String password) throws SQLException {
         java.sql.Driver driver = new Driver();
         DriverManager.registerDriver(driver);
-        this.connection = DriverManager.getConnection(URL + dbName, user, password);
+        this.dbName = dbName;
+        this.user = user;
+        this.password = password;
     }
 
     /**This method give an opportunity to execute SQL function: <h2>INSERT</h2>
@@ -64,7 +70,7 @@ public class MySQLQueryExecutor {
      * @param record a {@link Record} corresponding to a specific table.
      * The record description rules for the table are specified in the class description.
      * @param whereExpression condition of WHERE SQL keyword ({@link WhereExpression})
-     * @throws SQLSyntaxErrorException if param {@code tableName} or {@code expression} does not match data from database
+     * @throws SQLSyntaxErrorException if param {@code tableName} or {@code whereExpression} does not match data from database
      * @throws SQLException
      * @throws ConnectionIsClosedException if connection with database is closed method throws this Exception
      * @throws IncorrectRecordException if record fields does not match the corresponding table.
@@ -203,10 +209,20 @@ public class MySQLQueryExecutor {
 
     /**
      * Method closes connection with database
+     * <h3>After working with database connection must be closed!</h4>
      * @throws SQLException
      */
-    public void close() throws SQLException {
+    public void closeConnection() throws SQLException {
         connection.close();
+    }
+
+    /**
+     * Method opens connection with database
+     * <h3>Before working with database connection must be opened!</h4>
+     * @throws SQLException
+     */
+    public void openConnection() throws SQLException {
+        connection = DriverManager.getConnection(URL + dbName, user, password);
     }
 
     /**
@@ -287,7 +303,9 @@ public class MySQLQueryExecutor {
        rec.addField("name", "Ivan");
        expression.addCondition("name='Vasya'");
 
+       executor.openConnection();
        executor.update("test_table", rec, expression);
+       executor.closeConnection();
     }
 
 }

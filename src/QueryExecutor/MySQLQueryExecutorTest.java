@@ -1,38 +1,46 @@
 package QueryExecutor;
+import QueryExecutor.Exceptions.ConnectionIsClosedException;
 import QueryExecutor.Exceptions.IncorrectRecordException;
 import QueryExecutor.Record.Record;
 import QueryExecutor.WhereExpression.WhereExpression;
 import org.junit.jupiter.api.*;
 
-
+import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 
 class MySQLQueryExecutorTest {
 
     static MySQLQueryExecutor executor;
+    private final static String DB_NAME = "test_database";
+    private final static String USERNAME = "admin";
+    private final static String PASSWORD = "admin";
+    private final static String TABLE_NAME = "junit_table";
 
     @BeforeAll
     static void initExecutor() throws SQLException {
-        executor = new MySQLQueryExecutor("test_database", "admin", "admin");
-        executor.truncate("junit_table");
+        executor = new MySQLQueryExecutor(DB_NAME, USERNAME, PASSWORD);
+        executor.openConnection();
+    }
+
+    @AfterEach
+    void clearTable() throws SQLException {
+        executor.truncate(TABLE_NAME);
     }
 
     @AfterAll
     static void closeExecutor() throws SQLException {
-        executor.close();
+        executor.closeConnection();
     }
-
 
     @Test
     @DisplayName("insert test: should insert a correct record into db table")
     void shouldInsertIfRecordIsCorrect() throws SQLException {
         Record record = getCorrectRecord();
-        executor.insert("junit_table", record);
+        executor.insert(TABLE_NAME, record);
         WhereExpression we = new WhereExpression();
         we.addCondition("age=4").and("name='Ivan'");
-        List<Record> recs =  executor.select("junit_table", we);
+        List<Record> recs =  executor.select(TABLE_NAME, we);
         Assertions.assertEquals(record, recs.get(0));
     }
 
@@ -42,7 +50,18 @@ class MySQLQueryExecutorTest {
     void shouldThrowExceptionIfRecordIsIncorrect() throws SQLException {
         Record record = getIncorrectRecord();
         Assertions.assertThrows(IncorrectRecordException.class,
-                () -> executor.insert("junit_table", record));
+                () -> executor.insert(TABLE_NAME, record));
+    }
+
+    @Test
+    @DisplayName("insert test: should throws ConnectionIsClosedException " +
+            "if executor is closed")
+    void shouldThrowExceptionIfConnectionIsClosed() throws SQLException {
+        Record record = getCorrectRecord();
+        executor.closeConnection();
+        Assertions.assertThrows(ConnectionIsClosedException.class,
+                () -> executor.insert(TABLE_NAME, record));
+        executor.openConnection();
     }
 
     @Test
