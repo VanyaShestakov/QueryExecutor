@@ -41,6 +41,10 @@ public class Record {
         return data.keySet();
     }
 
+    public Map<String, Object> getMap() {
+        return data;
+    }
+
     public Set<String> getFieldNames() {
         return data.keySet();
     }
@@ -56,11 +60,41 @@ public class Record {
         if (o == null || getClass() != o.getClass())
             return false;
         Record record = (Record) o;
-        return data.equals(record.data);
+        Set<String> keys = getKeySet();
+        for (String key: keys) {
+            if (!record.contains(key)) {
+                return false;
+            }
+            Object val = record.getValue(key);
+            Object comparableVal = val instanceof java.sql.Date ? val.toString() : val;
+            if (!data.get(key).equals(comparableVal)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(data);
+        int hash = 31;
+        Set<String> keys = getKeySet();
+        Object val;
+        for (String key: keys) {
+            val = data.get(key);
+            val = val instanceof java.sql.Date ? val.toString() : val;
+            hash *= val.hashCode();
+        }
+        return hash;
+    }
+
+    public static void main(String[] args) {
+        Record rec = new Record();
+        rec.addField("q", 1);
+        rec.addField("r", null);
+
+        Record rec1 = new Record();
+        rec1.addField("r", null);
+        rec1.addField("q", 1);
+        System.out.println(rec.equals(rec1));
     }
 }
