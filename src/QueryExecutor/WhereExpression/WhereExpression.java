@@ -16,17 +16,17 @@ public class WhereExpression {
 
         public Condition or(String condition) {
             expression.append(" OR ").append(condition);
-            return new Condition(expression);
+            return this;
         }
 
         public Condition and(String condition) {
             expression.append(" AND ").append(condition);
-            return new Condition(expression);
+            return this;
         }
 
         public Condition not(String condition) {
             expression.append(" NOT ").append(condition);
-            return new Condition(expression);
+            return this;
         }
 
     }
@@ -39,6 +39,12 @@ public class WhereExpression {
     @Override
     public String toString () {
         return expression.toString();
+    }
+
+    public static void main(String[] args) {
+        WhereExpression expression = new WhereExpression();
+        expression.addCondition("aaa").and("ss");
+        System.out.println(expression);
     }
 
 }

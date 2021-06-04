@@ -64,7 +64,17 @@ class MySQLQueryExecutorTest {
     }
 
     @Test
-    void update() {
+    @DisplayName("update test: should throws IncorrectRecordException if record with changes is empty")
+    void shouldThrowExceptionIfRecordIsEmpty() throws SQLException {
+        Record emptyRecord = new Record();
+        Record record = getCorrectRecord();
+
+        WhereExpression expression = new WhereExpression();
+        expression.addCondition("name = 'Ivan'");
+        executor.openConnection();
+        executor.insert(TABLE_NAME, record);
+        Assertions.assertThrows(IncorrectRecordException.class,
+                () ->  executor.update(TABLE_NAME, emptyRecord, expression));
     }
 
     private Record getCorrectRecord() {
