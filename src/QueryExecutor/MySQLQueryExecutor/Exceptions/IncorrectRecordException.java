@@ -1,6 +1,4 @@
-package QueryExecutor.Exceptions;
-
-import java.io.Serializable;
+package QueryExecutor.MySQLQueryExecutor.Exceptions;
 
 public class IncorrectRecordException extends RuntimeException {
     public IncorrectRecordException() {

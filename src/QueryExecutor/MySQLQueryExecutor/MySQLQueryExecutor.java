@@ -1,7 +1,7 @@
-package QueryExecutor;
+package QueryExecutor.MySQLQueryExecutor;
 
-import QueryExecutor.Exceptions.ConnectionIsClosedException;
-import QueryExecutor.Exceptions.IncorrectRecordException;
+import QueryExecutor.MySQLQueryExecutor.Exceptions.ConnectionIsClosedException;
+import QueryExecutor.MySQLQueryExecutor.Exceptions.IncorrectRecordException;
 import QueryExecutor.Record.Record;
 import QueryExecutor.WhereExpression.WhereExpression;
 import Tools.Pair;
@@ -296,16 +296,13 @@ public class MySQLQueryExecutor {
     }
 
     public static void main(String[] args) throws SQLException {
-       MySQLQueryExecutor executor = new MySQLQueryExecutor("test_database", "admin", "admin");
-       WhereExpression expression = new WhereExpression();
-       Record rec = new Record();
-
-       rec.addField("name", "Ivan");
-       expression.addCondition("name='Vasya'");
-
-       executor.openConnection();
-       executor.update("test_table", rec, expression);
-       executor.closeConnection();
+        MySQLQueryExecutor executor = new MySQLQueryExecutor("test_database", "admin", "admin");
+        Record record = new Record();
+        record.addField("id", 1);
+        record.addField("name" , "Sosiska");
+        record.addField("date", "2020-11-08");
+        record.addField("temperature", 34.4);
+        record.insert("test_database", "admin", "admin", "test_table");
     }
 
 }

@@ -1,7 +1,9 @@
 package QueryExecutor.Record;
 
+import QueryExecutor.MySQLQueryExecutor.MySQLQueryExecutor;
 import QueryExecutor.Record.Exceptions.FieldNameDoesNotExistsException;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -47,6 +49,13 @@ public class Record {
 
     public Set<String> getFieldNames() {
         return data.keySet();
+    }
+
+    public void insert(String dbName, String user, String password, String tableName) throws SQLException {
+        MySQLQueryExecutor executor = new MySQLQueryExecutor(dbName, user, password);
+        executor.openConnection();
+        executor.insert(tableName, this);
+        executor.closeConnection();
     }
 
     public String toString () {

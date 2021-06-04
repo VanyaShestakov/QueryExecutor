@@ -1,11 +1,10 @@
-package QueryExecutor;
-import QueryExecutor.Exceptions.ConnectionIsClosedException;
-import QueryExecutor.Exceptions.IncorrectRecordException;
+package QueryExecutor.MySQLQueryExecutor;
+import QueryExecutor.MySQLQueryExecutor.Exceptions.ConnectionIsClosedException;
+import QueryExecutor.MySQLQueryExecutor.Exceptions.IncorrectRecordException;
 import QueryExecutor.Record.Record;
 import QueryExecutor.WhereExpression.WhereExpression;
 import org.junit.jupiter.api.*;
 
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 

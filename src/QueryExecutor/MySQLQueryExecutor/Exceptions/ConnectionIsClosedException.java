@@ -1,4 +1,4 @@
-package QueryExecutor.Exceptions;
+package QueryExecutor.MySQLQueryExecutor.Exceptions;
 
 public class ConnectionIsClosedException extends RuntimeException {
     public ConnectionIsClosedException() {

@@ -1,4 +1,4 @@
-package Databases;
+package QueryExecutor.MySQLQueryExecutor;
 
 import Tools.Pair;
 
